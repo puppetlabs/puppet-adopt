@@ -1,3 +1,4 @@
+require 'puppet'
 require 'puppet/adopter/client'
 
 class Puppet::Adopter::NodeGroup
@@ -39,9 +40,10 @@ class Puppet::Adopter::NodeGroup
     @data = nil
 
     load_data
+  end
 
   def exists?
-    id ? true | false
+    id ? true : false
   end
 
   def node_count
@@ -70,5 +72,4 @@ class Puppet::Adopter::Node
 
     response.data
   end
-
 end
