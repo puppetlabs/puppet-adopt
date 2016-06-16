@@ -1,0 +1,75 @@
+require 'puppetdb'
+require 'puppetclassify'
+
+class Puppet::Adopter::Client
+
+  @pdb_config = {}
+  @nc_config = {}
+
+  def Client.pdb_config=(config)
+    @pdb_config = config
+  end
+
+  def Client.nc_config=(config )
+    @nc_cnfig = config
+  end
+
+  def Client.pdb_config
+#    client = PuppetDB::Client.new( {:server => 'http://localhost:8080/pdb/query'}, 4)
+    {
+      'key'      => Puppet['host_priv_key'],
+      'cert'     => Puppet['hostcert'],
+      'ca_file'  => Puppet['localcacert'],
+      'hostname' => 'localhost'
+    }.merge @pdb_config
+  end
+
+  def Client.nc_config
+    {
+      "ca_certificate_path" => Puppet['localcacert'],
+      "certificate_path"    => Puppet['hostcert'],
+      "private_key_path"    => Puppet['hostprivkey'],
+      "hostname"            => 'localhost'
+    }.merge @nc_config
+  end
+
+  def Client.verify_pdb_client
+    # Better connection error checking should be built into the actual puppetdb-ruby lib :(
+    begin
+      pdb_client.request('nodes', nil)
+    rescue
+      raise(Puppet::Error,"Cannot contact default PDB on localhost")
+    end
+  end
+
+  def Client.verify_nc_client
+    begin
+      nc_client.groups.get_groups
+    rescue
+      raise(Puppet::Error, "Cannot contact default Node Classifier on localhost")
+    end
+  end
+
+  def Client.build_nc_client
+    @nc_client = PuppetClassify.new("https://#{nc_config['hostname']}:4433/classifier-api", nc_config)
+
+    verify_nc_client
+  end
+
+  def Client.build_pdb_client
+    @pdb_client = PuppetDB::Client.new({
+      :server => "https://#{pdb_config['hostname']}:8081/pdb/query",
+      :pem => pdb_config
+    })
+
+    verify_pdb_client
+  end
+
+  def Client.nc_client
+    @nc_client || build_nc_client
+  end
+
+  def Client.pdb_client
+    @pdb_client || build_pdb_client
+  end
+end
