@@ -56,6 +56,7 @@ module Puppet::Adopter
         @nc_client = PuppetClassify.new("https://#{nc_config['hostname']}:4433/classifier-api", nc_config)
 
         verify_nc_client
+        @nc_client
       end
 
       def build_pdb_client
@@ -65,6 +66,7 @@ module Puppet::Adopter
         },4)
 
         verify_pdb_client
+        @pdb_client
       end
 
       def nc_client
