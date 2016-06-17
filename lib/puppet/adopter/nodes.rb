@@ -1,75 +1,77 @@
 require 'puppet'
 require 'puppet/adopter/client'
 
-class Puppet::Adopter::NodeGroup
+module Puppet::Adopter
+  class NodeGroup
 
-  attr_accessor :name, :pdb_client, :nc_client, :id, :nodes, :certnames
+    attr_accessor :name, :pdb_client, :nc_client, :id, :nodes, :certnames
 
-  def initialize(group_name, classifier_client = nil, puppetdb_client = nil)
+    def initialize(group_name, classifier_client = nil, puppetdb_client = nil)
 
-    @name = group_name
-    @pdb_client = puppetdb_client || Puppet::Adopter::Client.pdb_client
-    @nc_client = classifier_client || Puppet::Adopter::Client.nc_client
-    @nodes = Array.new
-    @certnames = Array.new
+      @name = group_name
+      @pdb_client = puppetdb_client || Puppet::Adopter::Client.pdb_client
+      @nc_client = classifier_client || Puppet::Adopter::Client.nc_client
+      @nodes = Array.new
+      @certnames = Array.new
 
-    load_data
-  end
+      load_data
+    end
 
-  #Loads details of group
-  def load_data
-    @id = nc_client.groups.get_group_id(name)
+    #Loads details of group
+    def load_data
+      @id = nc_client.groups.get_group_id(name)
 
-    if exists?
-      @data = nc_client.groups.get_group(id)
+      if exists?
+        @data = nc_client.groups.get_group(id)
 
-      rules = nc_client.rules.tranlsate(@data['rules'])
+        rules = nc_client.rules.tranlsate(@data['rules'])["query"]
 
-      result = puppetdb_client.request('nodes',["extract","certname", rules])
+        result = pdb_client.request('nodes',["extract","certname", rules])
 
-      result.data.each do |node|
-        @nodes << Puppet::Adopert::Node.new( node['certname'] )
-        @certnames << node['certname']
+        result.data.each do |node|
+          @nodes << Puppet::Adopter::Node.new( node['certname'] )
+          @certnames << node['certname']
+        end
       end
+    end
+
+    def reload
+      @nodes = Array.new
+      @certnames = Array.new
+      @data = nil
+
+      load_data
+    end
+
+    def exists?
+      id ? true : false
+    end
+
+    def node_count
+      certnames.count
     end
   end
 
-  def reload
-    @nodes = Array.new
-    @certnames = Array.new
-    @data = nil
+  class Node
 
-    load_data
-  end
+    attr_accessor :name, :pdb
 
-  def exists?
-    id ? true : false
-  end
+    def initialize(certname, pdb_client = nil)
 
-  def node_count
-    certnames.count
-  end
-end
+      @name = certname
+      @pdb = pdb_client || Puppet::Adopter::Client.pdb_client()
+    end
 
-class Puppet::Adopter::Node
+    def report
+      response = pdb.request('reports', ["and",["=","certname",name],["=","latest_report?",true]])
 
-  attr_accessor :name, :pdb
+      response.data
+    end
 
-  def initialize(certname, pdb_client = nil)
+    def events
+      response = pdb.request('events',["and",["=","latest_report?",true],["=","certname",name]])
 
-    @name = certname
-    @pdb = pdb_client || Puppet::Adopter::Client.pdb_client()
-  end
-
-  def report
-    response = pdb.request('reports', ["and",["=","certname",name],["=","latest_report?",true]])
-
-    response.data
-  end
-
-  def events
-    response = pdb.request('events',["and",["=","latest_report?",true],["=","certname",name]])
-
-    response.data
+      response.data
+    end
   end
 end
