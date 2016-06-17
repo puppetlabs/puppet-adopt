@@ -24,7 +24,7 @@ module Puppet::Adopter
       if exists?
         @data = nc_client.groups.get_group(id)
 
-        rules = nc_client.rules.tranlsate(@data['rules'])["query"]
+        rules = nc_client.rules.translate(@data['rule'])["query"]
 
         result = pdb_client.request('nodes',["extract","certname", rules])
 
