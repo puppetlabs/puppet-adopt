@@ -33,7 +33,7 @@ class Puppet::Adopter::EventTracker
   end
 
   def process_event(event_hash)
-    unless [:type, :title, :old_value, :new_value].all? {|k| details.key? k}
+    unless [:type, :title, :old_value, :new_value].all? {|k| event_hash.key? k}
       raise(ArgumentError, 'Insufficient details to process an event')
     end
 
@@ -45,7 +45,7 @@ class Puppet::Adopter::EventTracker
           ['=','title',event_hash[:title]],
           group.rule
         ]
-      ]).data.firsti
+      ]).data.first['count']
 
     seen_ratio = catalog_count.fdiv(group.node_count)
 

@@ -1,21 +1,21 @@
 
 class Puppet::Adopter::Processor
 
-  attr_accessor :group, :variations
+  attr_accessor :group, :variations, :tracker
 
   def initialize(group)
     @group = group
-    @variations = Hash.new
     @tracker = Puppet::Adopter::EventTracker.new(group)
   end
 
   def process
+    @variations = Hash.new
     group.nodes.each do |node|
       events = node.events
 
       event_set = create_event_set(events)
 
-      if variations.has_key(event_set)
+      if variations.has_key?(event_set)
         variations[event_set] << node.name
       else
         variations[event_set] = [node.name]
@@ -28,8 +28,13 @@ class Puppet::Adopter::Processor
   def create_event_set(events)
     event_set = Set.new
 
-    events.each do |event|
-      event.except!(:type, :title, :old_value, :new_value)
+    events.each do |e|
+      event = {
+        :type => e['resource_type'],
+        :title => e['resource_title'],
+        :new_value => e['new_value'],
+        :old_value => e['old_value']
+      }
 
       if tracker.is_usable_event?(event)
         event_set.add event
@@ -40,7 +45,7 @@ class Puppet::Adopter::Processor
   end
 
   def finished?
-    @finished ? true : false
+    @variations ? true : false
   end
 
 end

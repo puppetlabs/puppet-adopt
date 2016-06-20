@@ -4,7 +4,7 @@ require 'puppet/adopter/client'
 module Puppet::Adopter
   class NodeGroup
 
-    attr_accessor :name, :pdb_client, :nc_client, :id, :nodes, :certnames
+    attr_accessor :name, :pdb_client, :nc_client, :id, :nodes, :certnames, :rule
 
     def initialize(group_name, classifier_client = nil, puppetdb_client = nil)
 
@@ -32,6 +32,7 @@ module Puppet::Adopter
           @nodes << Puppet::Adopter::Node.new( node['certname'] )
           @certnames << node['certname']
         end
+        @rule = rules
       end
     end
 
