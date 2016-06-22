@@ -29,13 +29,7 @@ class Puppet::Adopter::Processor
     event_set = Set.new
 
     events.each do |e|
-      event = {
-        :type => e['resource_type'],
-        :title => e['resource_title'],
-        :new_value => e['new_value'],
-        :old_value => e['old_value']
-      }
-
+      event = Puppet::Adopter::Event.new(e)
       if tracker.is_usable_event?(event)
         event_set.add event
       end
@@ -49,4 +43,3 @@ class Puppet::Adopter::Processor
   end
 
 end
-
