@@ -51,6 +51,35 @@ module Puppet::Adopter
     def node_count
       certnames.count
     end
+
+    def create(default_class)
+
+      group = {
+        'name' => name,
+        'environment' => 'production',
+        'parent' => '00000000-0000-4000-8000-000000000000',
+        'rule' => ["and", ["~", ["fact", "clientcert"], ".*"]], 
+        'classes' => {default_class => Hash.new}
+      }
+
+      result = nc_client.groups.create_group(group)
+
+      if result.nil?
+        group.delete :classes
+        result = nc_client.groups.create_group(group)
+
+        if result.nil?
+          raise(Puppet::Error, "Can not create group \"#{name}\"")
+        end
+      end
+
+      @id = result
+      load_data
+    end
+
+    def destroy
+      nc_client.groups.delete_group(id) if exists?
+    end
   end
 
   class Node
@@ -70,7 +99,23 @@ module Puppet::Adopter
     end
 
     def events
-      response = pdb.request('events',["and",["=","latest_report?",true],["=","certname",name]])
+      response = pdb.request('events',
+        ['extract',
+          [
+            'old_value',
+            'new_value',
+            'resource_title',
+            'resource_type',
+            'property',
+            'message',
+            'containing_class'
+          ],
+          ["and",
+            ["=","latest_report?",true],
+            ['=', 'status', 'noop'],
+            ["=","certname",name]
+          ]
+      ])
 
       response.data
     end

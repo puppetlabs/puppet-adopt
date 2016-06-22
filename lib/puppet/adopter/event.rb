@@ -62,13 +62,14 @@ class Puppet::Adopter::Event
   def initialize(data)
 
     if  data.kind_of? Hash
-      unless [:resource_type, :resource_title, :old_value, :new_value].all? {|k| data.key? k}
+      @data = Hash[data.map { |k, v| [k.to_sym, v] }]
+      unless [:resource_type, :resource_title, :old_value, :new_value].all? {|k| @data.key? k}
         raise(ArgumentError, 'Insufficient details to process an event')
       end
 
-      @data = Hash[data.map { |k, v| [k.to_sym, v] }]
     else
       raise(ArgumentError, "Must pass a hash to create a new Puppet::Adopter::Event")
+    end
   end
 
   def [](key)
@@ -83,6 +84,6 @@ class Puppet::Adopter::Event
   alias_method :eql?, :==
 
   def hash
-    @data[:resource_title].hash ^ @data['resource_type'].hash ^ @data['old_value'].hash
+    @data[:resource_title].hash ^ @data[:resource_type].hash ^ @data[:old_value].hash ^ @data[:property].hash
   end
 end

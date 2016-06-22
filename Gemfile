@@ -4,4 +4,5 @@ gem 'puppet_forge'
 gem 'puppetdb-ruby'
 gem 'puppetclassify'
 gem 'pcp-client'
+gem 'inquirer'
 
