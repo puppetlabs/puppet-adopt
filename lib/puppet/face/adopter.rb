@@ -88,7 +88,30 @@ Puppet::Face.define(:adopter, '0.0.1') do
     end
 
     when_rendering :console do |processor, name, options|
-      Puppet.notice processor.variations.count
+      Puppet.notice "Total Variations Discovered: #{processor.variations.count}\n"
+
+      count = 1
+      processor.variations.each do |events, nodes|
+        Puppet.notice "Variation #{count}"
+        Puppet.notice "    Total Events: #{events.count}"
+        Puppet.notice "    Total Nodes:  #{nodes.count}"
+        Puppet.notice "---\n"
+
+        events.each do |event|
+          Puppet.notice "Event - #{event['resource_type']}[#{event['resource_title']}]"
+          Puppet.notice "    Old Value: #{event['old_value']}"
+          Puppet.notice "    NewValue:  #{event['new_value']}"
+          Puppet.notice "---"
+        end
+
+        Puppet.notice "Nodes:"
+        nodes.each do |node|
+          Puppet.notice "    #{node}"
+        end
+        Puppet.notice "-----------------END VARIATION #{count}-------------"
+
+        count +=1
+      end
     end
   end
 
