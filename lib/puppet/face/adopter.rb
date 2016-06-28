@@ -88,30 +88,33 @@ Puppet::Face.define(:adopter, '0.0.1') do
     end
 
     when_rendering :console do |processor, name, options|
-      Puppet.notice "Total Variations Discovered: #{processor.variations.count}\n"
+      output = Array.new
+      output << "\n"
+      output << "Total Variations Discovered: #{processor.variations.count}\n"
 
       count = 1
       processor.variations.each do |events, nodes|
-        Puppet.notice "Variation #{count}"
-        Puppet.notice "    Total Events: #{events.count}"
-        Puppet.notice "    Total Nodes:  #{nodes.count}"
-        Puppet.notice "---\n"
+        output << "Variation #{count}"
+        output << "    Total Events: #{events.count}"
+        output << "    Total Nodes:  #{nodes.count}"
+        output << "---\n"
 
         events.each do |event|
-          Puppet.notice "Event - #{event['resource_type']}[#{event['resource_title']}]"
-          Puppet.notice "    Old Value: #{event['old_value']}"
-          Puppet.notice "    NewValue:  #{event['new_value']}"
-          Puppet.notice "---"
+          output << "Event - #{event['resource_type']}[#{event['resource_title']}]"
+          output << "    Old Value: #{event['old_value']}"
+          output << "    NewValue:  #{event['new_value']}"
+          output << "---"
         end
 
-        Puppet.notice "Nodes:"
+        output << "Nodes:"
         nodes.each do |node|
-          Puppet.notice "    #{node}"
+          output << "    #{node}"
         end
-        Puppet.notice "-----------------END VARIATION #{count}-------------"
+        output << "-----------------END VARIATION #{count}-------------"
 
         count +=1
       end
+      output.join("\n")
     end
   end
 
