@@ -101,8 +101,10 @@ Puppet::Face.define(:adopter, '0.0.1') do
 
         events.each do |event|
           output << "Event - #{event['resource_type']}[#{event['resource_title']}]"
+          output << "    Proporty:  #{event['property']}"
           output << "    Old Value: #{event['old_value']}"
           output << "    NewValue:  #{event['new_value']}"
+          output << "    Message:  #{event['message']}"
           output << "---"
         end
 
