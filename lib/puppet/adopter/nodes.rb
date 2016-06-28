@@ -58,8 +58,9 @@ module Puppet::Adopter
         'name' => name,
         'environment' => 'production',
         'parent' => '00000000-0000-4000-8000-000000000000',
-        'rule' => ["and", ["~", ["fact", "clientcert"], ".*"]], 
-        'classes' => {default_class => Hash.new}
+        'rule' => ["and", ["~", ["fact", "clientcert"], ".*"]],
+        'classes' => {default_class => Hash.new},
+        'variables'=> {'noop' => true}
       }
 
       result = nc_client.groups.create_group(group)
