@@ -56,7 +56,7 @@ class Puppet::Adopter::Runner
     end
 
     run_message.expires(10)
-    client.send(message)
+    client.send(run_message)
 
     progressbar = ProgressBar.create(:total => @group.certnames.count, :title => "Nodes Complete", :length => 80)
 
