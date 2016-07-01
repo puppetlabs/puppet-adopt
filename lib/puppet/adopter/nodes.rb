@@ -53,7 +53,7 @@ module Puppet::Adopter
       @nodes.values
     end
 
-    def certanmes
+    def certnames
       @nodes.keys
     end
 
@@ -111,9 +111,9 @@ module Puppet::Adopter
     def events
 
       if report_hash
-        report_loopup = ["=","report", report_hash]
+        report_lookup = ["=","report", report_hash]
       else
-        report_loopup = ["=","latest_report?",true]
+        report_lookup = ["=","latest_report?",true]
       end
 
       response = pdb.request('events',
@@ -128,7 +128,7 @@ module Puppet::Adopter
             'containing_class'
           ],
           ["and",
-            report_looup,
+            report_lookup,
             ['=', 'status', 'noop'],
             ["=","certname",name]
           ]
