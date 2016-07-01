@@ -114,8 +114,8 @@ module Puppet::Adopter
          report_hash = pdb.request('reports',
           ['extract',
             ['hash'],
-            ['=','trasnaction_uuid', transaction_uuid]
-          ]).data['hash']
+            ['=','transaction_uuid', transaction_uuid]
+          ]).data.first['hash']
 
         report_lookup = ["=","report", report_hash]
       else
