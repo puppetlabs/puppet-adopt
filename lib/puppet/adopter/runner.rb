@@ -1,4 +1,4 @@
-require 'pcp-client'
+require 'pcp/client'
 require 'timeout'
 require 'ruby-progressbar'
 
@@ -37,41 +37,44 @@ class Puppet::Adopter::Runner
       raise "Failure connecting to PCP broker" unless client.connect
     end
 
-   run_message = prepare_message(@group.certnames)
-   transaction_id = run_message.data['transaction_id']
-   completed_list = Array.new
+    transaction_id = SecureRandom.uuid
+    run_message = prepare_message(@group.certnames, transaction_id)
+    completed_list = Array.new
 
-   client.on_message = proc do |message|
-     Puppet.debug "Received a message over PCP - #{message.data['transaction_id']}"
-     if message.data['transaction_id'] == transaction_id and message.data['results']
-       sender = message[:sender].chomp('/agent').slice(6..-1)
-       @group[sender].use_transaction_uuid( message.data['results']['transaction_uuid'] )
+    client.on_message = proc do |message|
+      data = JSON.parse message.data
 
-       completed_list << sender
-       #tell progress bar to increment
-     end
-  end
+      Puppet.debug "Received a message over PCP - #{data['transaction_id']}"
 
-  run_message.expires(10)
-  client.send(message)
+      if data['transaction_id'] == transaction_id and data['results']
+        sender = message[:sender].chomp('/agent').slice(6..-1)
+        @group[sender].use_transaction_uuid( data['results']['transaction_uuid'] )
 
-  progressbar = ProgressBar.create(:total => @group.certnames.count, :title => "Nodes Complete", :length => 80)
-
-  begin
-    Timeout::timeout(timeout) {
-      until completed_list.count == @group.certnames.count
-        progressbar.progress = completed_list.count
-        sleep 0.5
+        completed_list << sender
+        #tell progress bar to increment
       end
-    }
-  rescue Timeout::Error
-    Puppet.debug "Execution expired while waiting for Puppet Agents to complete run"
+    end
+
+    run_message.expires(10)
+    client.send(message)
+
+    progressbar = ProgressBar.create(:total => @group.certnames.count, :title => "Nodes Complete", :length => 80)
+
+    begin
+      Timeout::timeout(timeout) {
+        until completed_list.count == @group.certnames.count
+          progressbar.progress = completed_list.count
+          sleep 0.5
+        end
+      }
+    rescue Timeout::Error
+      Puppet.debug "Execution expired while waiting for Puppet Agents to complete run"
+    end
+
+    completed_list
   end
 
-  completed_list
-  end
-
-  def prepare_message(node_list)
+  def prepare_message(node_list, uuid = SecureRandom.uuid)
 
     targets = node_list.map{|node| "pcp://#{node}/agent" }
 
@@ -86,7 +89,7 @@ class Puppet::Adopter::Runner
     }
 
     message_data = {
-      :transaction_id => SecureRandom.uuid,
+      :transaction_id => uuid,
       :module         => 'pxp-module-puppet',
       :action         => 'run',
       :params         => params,
