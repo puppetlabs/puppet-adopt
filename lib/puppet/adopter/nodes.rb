@@ -85,7 +85,7 @@ module Puppet::Adopter
 
   class Node
 
-    attr_accessor :name, :pdb
+    attr_accessor :name, :pdb, :report_hash
 
     def initialize(certname, pdb_client = nil)
 
@@ -100,6 +100,13 @@ module Puppet::Adopter
     end
 
     def events
+
+      if report_hash
+        report_loopup = ["=","report", report_hash]
+      else
+        report_loopup = ["=","latest_report?",true]
+      end
+
       response = pdb.request('events',
         ['extract',
           [
@@ -112,13 +119,21 @@ module Puppet::Adopter
             'containing_class'
           ],
           ["and",
-            ["=","latest_report?",true],
+            report_looup,
             ['=', 'status', 'noop'],
             ["=","certname",name]
           ]
       ])
 
       response.data
+    end
+
+    def use_transaction_uuid(uuid)
+      @report_hash = pdb.request('reports',
+        ['extract',
+          ['hash'],
+          ['=','trasnaction_uuid', uuid]
+        ])
     end
   end
 end
