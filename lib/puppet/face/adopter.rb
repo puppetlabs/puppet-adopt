@@ -76,6 +76,14 @@ Puppet::Face.define(:adopter, '0.0.1') do
         group.reload
       end
 
+      Puppet.notice "Starting Puppet Agent runs on experiment population"
+      runner = Puppet::Adopter::Runner.new(group)
+      completed = runner.run(120)
+
+      Puppet.notice "Puppet Agent runs completed"
+      if completed.count != group.node_count
+        Puppet.notice "Only #{completed.count} nodes of #{group.node_count} nodes in group completed a Puppet Agent in time provided"
+      end
       # Run all nodes in group using PCP?
 
       processor = Puppet::Adopter::Processor.new(group)
