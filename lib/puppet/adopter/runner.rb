@@ -67,7 +67,9 @@ class Puppet::Adopter::Runner
           sleep 0.5
         end
       }
+      progressbar.finish
     rescue Timeout::Error
+      progressbar.finish
       Puppet.debug "Execution expired while waiting for Puppet Agents to complete run"
     end
 
