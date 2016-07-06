@@ -51,7 +51,7 @@ Puppet::Face.define(:adopter, '0.0.1') do
       simple_name = name.split('-').last
       group_name = options[:group_name] || "Adopter Experiment: #{simple_name}"
 
-      group = Puppet::Adopter::NodeGroup.new(group_name)
+      group = PuppetX::Adopter::NodeGroup.new(group_name)
 
       # eff this code, replace with some ruby
       if group.exists?
@@ -62,7 +62,7 @@ Puppet::Face.define(:adopter, '0.0.1') do
           group.destroy
           group.create(simple_name)
           Puppet.notice "Check classification for \"#{group_name}\" in the Enterprise Console before continuing"
-          Puppet.notice "Navigate a browser to https://#{Puppet::Adopter::Client.nc_config['hostname']}/#/node_groups/groups/#{group.id}"
+          Puppet.notice "Navigate a browser to https://#{PuppetX::Adopter::Client.nc_config['hostname']}/#/node_groups/groups/#{group.id}"
           Ask.input "When you are ready, press enter to continue"
           group.reload
         end
@@ -71,13 +71,13 @@ Puppet::Face.define(:adopter, '0.0.1') do
         Puppet.notice "Creating new group for experiment..."
         group.create(simple_name)
         Puppet.notice "Check classification for \"#{group_name}\" in the Enterprise Console before continuing"
-        Puppet.notice "Navigate a browser to https://#{Puppet::Adopter::Client.nc_config['hostname']}/#/node_groups/groups/#{group.id}"
+        Puppet.notice "Navigate a browser to https://#{PuppetX::Adopter::Client.nc_config['hostname']}/#/node_groups/groups/#{group.id}"
         Ask.input "When you are ready, press enter to continue"
         group.reload
       end
 
       Puppet.notice "Starting Puppet Agent runs on experiment population"
-      runner = Puppet::Adopter::Runner.new(group)
+      runner = PuppetX::Adopter::Runner.new(group)
       completed = runner.run(120)
 
       Puppet.notice "Puppet Agent runs completed"
@@ -86,7 +86,7 @@ Puppet::Face.define(:adopter, '0.0.1') do
       end
       # Run all nodes in group using PCP?
 
-      processor = Puppet::Adopter::Processor.new(group)
+      processor = PuppetX::Adopter::Processor.new(group)
       processor.process
 
       # Logic to figure out if it worked correctly

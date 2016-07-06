@@ -2,7 +2,7 @@ require 'pcp/client'
 require 'timeout'
 require 'ruby-progressbar'
 
-class Puppet::Adopter::Runner
+class PuppetX::Adopter::Runner
 
   def initialize(group, config={})
     @group = group

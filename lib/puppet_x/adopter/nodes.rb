@@ -1,7 +1,7 @@
 require 'puppet'
 require 'puppet/adopter/client'
 
-module Puppet::Adopter
+module PuppetX::Adopter
   class NodeGroup
 
     attr_accessor :name, :pdb_client, :nc_client, :id, :rule
@@ -9,8 +9,8 @@ module Puppet::Adopter
     def initialize(group_name, classifier_client = nil, puppetdb_client = nil)
 
       @name = group_name
-      @pdb_client = puppetdb_client || Puppet::Adopter::Client.pdb_client
-      @nc_client = classifier_client || Puppet::Adopter::Client.nc_client
+      @pdb_client = puppetdb_client || PuppetX::Adopter::Client.pdb_client
+      @nc_client = classifier_client || PuppetX::Adopter::Client.nc_client
       @nodes = Hash.new
 
       load_data
@@ -28,7 +28,7 @@ module Puppet::Adopter
         result = pdb_client.request('nodes',["extract","certname", rules])
 
         result.data.each do |node|
-          @nodes[node['certname']] = Puppet::Adopter::Node.new( node['certname'] )
+          @nodes[node['certname']] = PuppetX::Adopter::Node.new( node['certname'] )
         end
         @rule = rules
       end
@@ -99,7 +99,7 @@ module Puppet::Adopter
     def initialize(certname, pdb_client = nil)
 
       @name = certname
-      @pdb = pdb_client || Puppet::Adopter::Client.pdb_client()
+      @pdb = pdb_client || PuppetX::Adopter::Client.pdb_client()
     end
 
     def report

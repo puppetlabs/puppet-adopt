@@ -1,11 +1,11 @@
 
-class Puppet::Adopter::Processor
+class PuppetX::Adopter::Processor
 
   attr_accessor :group, :variations, :tracker
 
   def initialize(group)
     @group = group
-    @tracker = Puppet::Adopter::EventTracker.new(group)
+    @tracker = PuppetX::Adopter::EventTracker.new(group)
   end
 
   def process
@@ -29,7 +29,7 @@ class Puppet::Adopter::Processor
     event_set = Set.new
 
     events.each do |e|
-      event = Puppet::Adopter::Event.new(e)
+      event = PuppetX::Adopter::Event.new(e)
       if tracker.is_usable_event?(event)
         event_set.add event
       end

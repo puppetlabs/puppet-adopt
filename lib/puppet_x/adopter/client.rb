@@ -1,7 +1,7 @@
 require 'puppetdb'
 require 'puppetclassify'
 
-module Puppet::Adopter
+module PuppetX::Adopter
   class Client
 
     @pdb_config = {}

@@ -1,13 +1,13 @@
 require 'set'
 
-class Puppet::Adopter::EventTracker
+class PuppetX::Adopter::EventTracker
 
   attr_accessor :usable_events, :fuzzy_events, :client, :group
 
   def initialize(group, pdb_client = nil)
 
     @group = group
-    @client = pdb_client || Puppet::Adopter::Client.pdb_client()
+    @client = pdb_client || PuppetX::Adopter::Client.pdb_client()
     @usable_events = Set.new
     @fuzzy_events = Set.new
   end
@@ -33,7 +33,7 @@ class Puppet::Adopter::EventTracker
   end
 
   def process_event(event)
-    unless event.is_a? Puppet::Adopter::Event
+    unless event.is_a? PuppetX::Adopter::Event
       raise(ArgumentError, 'Insufficient details to process an event')
     end
 
@@ -58,7 +58,7 @@ class Puppet::Adopter::EventTracker
   end
 end
 
-class Puppet::Adopter::Event
+class PuppetX::Adopter::Event
   def initialize(data)
 
     if  data.kind_of? Hash
@@ -68,7 +68,7 @@ class Puppet::Adopter::Event
       end
 
     else
-      raise(ArgumentError, "Must pass a hash to create a new Puppet::Adopter::Event")
+      raise(ArgumentError, "Must pass a hash to create a new PuppetX::Adopter::Event")
     end
   end
 
