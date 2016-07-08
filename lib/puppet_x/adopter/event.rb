@@ -47,9 +47,9 @@ class PuppetX::Adopter::EventTracker
         ]
       ]).data.first['count']
 
-    seen_ratio = catalog_count.fdiv(group.node_count)
+    seen_percentage = catalog_count.fdiv(group.node_count)
 
-    if seen_ratio < 0.5
+    if seen_percentage < 0.5
       fuzzy_events.add event
     else
       usable_events.add event
