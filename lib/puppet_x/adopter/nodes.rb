@@ -1,5 +1,5 @@
 require 'puppet'
-require 'puppet/adopter/client'
+require 'puppet_x/adopter/client'
 
 module PuppetX::Adopter
   class NodeGroup

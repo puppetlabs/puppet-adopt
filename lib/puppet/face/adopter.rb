@@ -1,7 +1,7 @@
 require 'puppet/face'
 require 'puppet/forge'
 require 'puppet/module_tool/install_directory'
-require 'puppet/adopter'
+require 'puppet_x/adopter'
 require 'inquirer'
 
 Puppet::Face.define(:adopter, '0.0.1') do
