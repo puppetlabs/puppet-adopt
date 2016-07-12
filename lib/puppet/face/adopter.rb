@@ -36,7 +36,7 @@ Puppet::Face.define(:adopter, '0.0.1') do
 
     when_invoked do |name, options|
 
-      Puppet.notice "Preparing to run exeriment for module '#{name}'"
+      Puppet.notice "Preparing to run experiment for module '#{name}'"
 
       Puppet.notice "Installing Modules..."
       module_face = Puppet::Interface[:module, :current]
@@ -55,8 +55,8 @@ Puppet::Face.define(:adopter, '0.0.1') do
 
       # eff this code, replace with some ruby
       if group.exists?
-        if Ask.confirm "Group \"#{group_name}\" currently exists, use exisitng group?"
-          Puppet.notice "Using exisiting group"
+        if Ask.confirm "Group \"#{group_name}\" currently exists, use existing group?"
+          Puppet.notice "Using existing group"
         else
           Puppet.notice "Recreating group..."
           group.destroy

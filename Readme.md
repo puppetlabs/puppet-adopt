@@ -7,14 +7,14 @@ without the need to write Puppet code.
 ##Usage
 
 ```shell
-puppet module adopt <module name>
+puppet adopter module <module name>
 ```
 
 *Example Run*
 
 ```
 [root@master ~]# puppet adopter module puppetlabs-ntp
-Notice: Preparing to run exeriment for module 'puppetlabs-ntp'
+Notice: Preparing to run experiment for module 'puppetlabs-ntp'
 Notice: Installing Modules...
 Notice: Preparing to install into /etc/puppetlabs/code/environments/production/modules ...
 Notice: Downloading from https://forgeapi.puppetlabs.com ...
@@ -208,4 +208,4 @@ allow these messages to be sent.
       }
   ,
 ```
-* Restart `pe-orchestrator-services` service for the rule to take effect
+* Restart `pe-orchestration-services` service for the rule to take effect
