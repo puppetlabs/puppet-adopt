@@ -138,7 +138,30 @@ in a development phase.
 * Runs on monolithic Installation of PE Only
 * Must be installed and run from the Master of Masters (MoM)
 
-###Install Prerequisites:
+### Install adopt module
+
+Eventually this will be hosted on the forge, so you can install just with:
+
+```bash
+puppet module install puppetlabs-adopt
+```
+
+In the mean time you'll need to git clone:
+
+```bash
+cd /etc/puppetlabs/code/modules`
+git clone https://github.com/trlinkin/puppet-adopt.git adopt`
+```
+
+### Classification Configuration
+
+1. Create a new node group called "Master Adopter"
+2. Add the "adopt" class
+3. Pin to the Puppet master:
+![Classification Screenshot 1](https://cloud.githubusercontent.com/assets/1064715/16812083/6b81af3c-4923-11e6-8085-e47a32d43088.png)
+![Classification Screenshot 2](https://cloud.githubusercontent.com/assets/1064715/16812084/6cff524c-4923-11e6-9f6e-5e31c5045f29.png)
+
+###Manual Install:
 A Number of Gems will need to be installed into Puppet Enterprise for this tool
 to function.
 
@@ -174,9 +197,6 @@ to function.
    1. Open `/etc/puppetlabs/code/environments/production/manifests/site.pp` for
     editing
    2. Add the following code to the end of this file: `noop_from_console('noop')`
-3. Install adopter module
-   1. `cd /etc/puppetlabs/code/modules`
-   2. `git clone https://github.com/trlinkin/puppet-adopt.git`
 
 ### Add new rule to PCP Broker
 
