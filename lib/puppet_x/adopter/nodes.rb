@@ -72,6 +72,16 @@ module PuppetX::Adopter
         'variables'=> {'noop' => true}
       }
 
+      # Check if class is avaliable
+      class_found = nc_client.classes.get_environment_classes('production').select {|x| x["name"] == default_class }
+
+      # If class is not found, do a refresh!
+      if class_found.empty?
+        Puppet.notice("Class #{default_class} not found in cache. Refreshing...")
+        nc_client.update_classes.update
+        Puppet.notice("Refreshed successfully!")
+      end
+
       result = nc_client.groups.create_group(group)
 
       if result.nil?
