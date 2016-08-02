@@ -4,11 +4,12 @@ require 'puppet_x/adopter/client'
 module PuppetX::Adopter
   class NodeGroup
 
-    attr_accessor :name, :pdb_client, :nc_client, :id, :rule
+    attr_accessor :name, :default_class, :pdb_client, :nc_client, :id, :rule
 
-    def initialize(group_name, classifier_client = nil, puppetdb_client = nil)
+    def initialize(group_name, default_class = nil, classifier_client = nil, puppetdb_client = nil)
 
       @name = group_name
+      @default_class = default_class
       @pdb_client = puppetdb_client || PuppetX::Adopter::Client.pdb_client
       @nc_client = classifier_client || PuppetX::Adopter::Client.nc_client
       @nodes = Hash.new
@@ -61,36 +62,49 @@ module PuppetX::Adopter
       @nodes[name]
     end
 
-    def create(default_class)
+    def default_class_exists_on_console?
+      if default_class
+        # Check if class is avaliable
+        nc_client.classes.get_environment_classes('production').any? {|x| x['name'] == default_class}
+      else
+        false
+      end
+    end
+
+    def reload_console_cache
+      last_refresh = nc_client.last_class_update.get
+      current_refresh = last_refresh
+
+      nc_client.update_classes.update
+
+      until current_refresh != last_refresh
+        sleep 0.5
+        current_refresh = nc_client.last_class_update.get
+      end
+    end
+
+    def create(with_default_class = true)
 
       group = {
         'name' => name,
         'environment' => 'production',
         'parent' => '00000000-0000-4000-8000-000000000000',
         'rule' => ["and", ["~", ["fact", "clientcert"], ".*"]],
-        'classes' => {default_class => Hash.new},
+        'classes' => Hash.new,
         'variables'=> {'noop' => true}
       }
 
-      # Check if class is avaliable
-      class_found = nc_client.classes.get_environment_classes('production').select {|x| x["name"] == default_class }
 
-      # If class is not found, do a refresh!
-      if class_found.empty?
-        Puppet.notice("Class #{default_class} not found in cache. Refreshing...")
-        nc_client.update_classes.update
-        Puppet.notice("Refreshed successfully!")
+      if with_default_class
+        raise(Puppet::Error, "Cannot create group with default class") unless default_class
+        group['classes'] = {default_class => Hash.new}
+        result = nc_client.groups.create_group(group)
+      else
+        result = nc_client.groups.create_group(group)
       end
 
-      result = nc_client.groups.create_group(group)
-
       if result.nil?
-        group.delete :classes
-        result = nc_client.groups.create_group(group)
-
-        if result.nil?
-          raise(Puppet::Error, "Can not create group \"#{name}\"")
-        end
+        raise(Puppet::Error, "Can not create group \"#{name}\"")
       end
 
       @id = result
