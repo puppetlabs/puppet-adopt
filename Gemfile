@@ -7,3 +7,7 @@ gem 'pcp-client'
 gem 'inquirer'
 gem 'ruby-progressbar'
 
+group :development do
+  gem 'rake'
+  gem 'byebug'
+end
