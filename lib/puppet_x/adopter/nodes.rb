@@ -146,5 +146,13 @@ module PuppetX::Adopter
     def use_transaction_uuid(uuid)
       @transaction_uuid = uuid
     end
+
+    def to_hash
+      {
+        name: self.name,
+        events: self.events,
+        transaction_uuid: self.transaction_uuid,
+      }
+    end
   end
 end
