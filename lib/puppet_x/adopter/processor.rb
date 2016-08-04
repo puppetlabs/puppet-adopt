@@ -16,9 +16,9 @@ class PuppetX::Adopter::Processor
       event_set = create_event_set(events)
 
       if variations.has_key?(event_set)
-        variations[event_set] << node.name
+        variations[event_set] << node
       else
-        variations[event_set] = [node.name]
+        variations[event_set] = [node]
       end
     end
 
