@@ -30,10 +30,6 @@ Puppet::Face.define(:adopter, '0.0.1') do
       EOT
     end
 
-    option "--group_name NAME", "-g NAME" do
-      summary "Name of exisiting group to use for experiment."
-    end
-
     when_invoked do |name, options|
       Puppet.notice "Preparing to run experiment for module '#{name}'"
       Puppet.notice "Installing Modules..."
@@ -48,7 +44,7 @@ Puppet::Face.define(:adopter, '0.0.1') do
       end
 
       simple_name = name.split('-').last
-      group_name = options[:group_name] || "Adopter Experiment: #{simple_name}"
+      group_name = "Adopter Experiment: #{simple_name}"
       group = PuppetX::Adopter::NodeGroup.new(group_name, simple_name)
 
       # Refreshes the console cache is the default class isn't found after fresh module install
