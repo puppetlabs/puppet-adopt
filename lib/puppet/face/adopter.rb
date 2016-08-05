@@ -30,15 +30,10 @@ Puppet::Face.define(:adopter, '0.0.1') do
       EOT
     end
 
-    option "--group_name NAME", "-g NAME" do
-      summary "Name of exisiting group to use for experiment."
-    end
-
     when_invoked do |name, options|
-
       Puppet.notice "Preparing to run experiment for module '#{name}'"
-
       Puppet.notice "Installing Modules..."
+
       module_face = Puppet::Interface[:module, :current]
       install_result = module_face.install(name,{:target_dir => options[:target_dir]})
 
@@ -49,27 +44,36 @@ Puppet::Face.define(:adopter, '0.0.1') do
       end
 
       simple_name = name.split('-').last
-      group_name = options[:group_name] || "Adopter Experiment: #{simple_name}"
+      group_name = "Adopter Experiment: #{simple_name}"
+      group = PuppetX::Adopter::NodeGroup.new(group_name, simple_name)
 
-      group = PuppetX::Adopter::NodeGroup.new(group_name)
+      # Refreshes the console cache is the default class isn't found after fresh module install
+      if install_result[:result] != :noop and not group.default_class_exists_on_console?
+        Puppet.notice "Default class \"#{simple_name}\" not found, reloading Enterprise Console cache..."
+        PuppetX::Adopter::Util.run_with_spinner(60) { group.reload_console_cache }
+      end
+      use_class = group.default_class_exists_on_console?
 
-      # eff this code, replace with some ruby
+      # Make sure the correct group exists
       if group.exists?
         if Ask.confirm "Group \"#{group_name}\" currently exists, use existing group?"
           Puppet.notice "Using existing group"
+          create_group = false
         else
           Puppet.notice "Recreating group..."
           group.destroy
-          group.create(simple_name)
-          Puppet.notice "Check classification for \"#{group_name}\" in the Enterprise Console before continuing"
-          Puppet.notice "Navigate a browser to https://#{PuppetX::Adopter::Client.nc_config['hostname']}/#/node_groups/groups/#{group.id}"
-          Ask.input "When you are ready, press enter to continue"
-          group.reload
+          create_group = true
         end
       else
-        # this code doesn't work yet :)
         Puppet.notice "Creating new group for experiment..."
-        group.create(simple_name)
+        create_group = true
+      end
+
+      if create_group
+        group.create(use_class)
+        if not use_class
+          Puppet.notice "No class named \"#{simple_name}\" found, you need to add the correct class or classes to this group manually."
+        end
         Puppet.notice "Check classification for \"#{group_name}\" in the Enterprise Console before continuing"
         Puppet.notice "Navigate a browser to https://#{PuppetX::Adopter::Client.nc_config['hostname']}/#/node_groups/groups/#{group.id}"
         Ask.input "When you are ready, press enter to continue"
