@@ -42,4 +42,39 @@ class PuppetX::Adopter::Processor
     @variations ? true : false
   end
 
+  def variations_to_hash
+    {
+      group: {
+        name: self.group.name,
+        id: self.group.id,
+        nodes: self.group.certnames,
+      },
+#      variations:
+    }
+  end
+
+
+  Variation = Struct.new(:events,:nodes) do
+    def to_hash
+      {
+        events: self.events_to_array,
+        nodes: self.variation_nodenames,
+      }
+    end
+
+    def variation_nodenames
+      nodes.map {|node| node.name}
+    end
+
+    def events_to_array
+      events.map { |event| event.to_hash }
+    end
+  end
+
+  def variations_to_a
+    self.variations.map do |events,nodes|
+      Variation.new(events,nodes)
+    end
+  end
+
 end
