@@ -59,6 +59,8 @@ class PuppetX::Adopter::EventTracker
 end
 
 class PuppetX::Adopter::Event
+  attr_reader :data
+  alias_method(:to_hash,:data)
   def initialize(data)
 
     if  data.kind_of? Hash
