@@ -90,6 +90,19 @@ module PuppetX::Adopter
     def destroy
       nc_client.groups.delete_group(id) if exists?
     end
+
+    def to_hash
+      {
+        name: self.name,
+        id: self.id,
+        rule: self.rule,
+        nodes: self.nodes_to_hash,
+      }
+    end
+
+    def nodes_to_hash
+      nodes.map { |node| node.to_hash }
+    end
   end
 
   class Node
