@@ -30,6 +30,16 @@ Puppet::Face.define(:adopter, '0.0.1') do
       EOT
     end
 
+    option "--recreate_group", "-r" do
+      summary "Recreate the classification group for the experiment."
+      description <<-EOT
+        This option can be used to instruct the tool recreate the classification group
+        used for the experiemnt. If the group is recreated, the tool will pause and allow
+        you to modify the dsetails of the group similar to the first time the tool is run
+        when no group exists.
+      EOT
+    end
+
     when_invoked do |name, options|
       Puppet.notice "Preparing to run experiment for module '#{name}'"
       Puppet.notice "Installing Modules..."
@@ -54,15 +64,15 @@ Puppet::Face.define(:adopter, '0.0.1') do
       end
       use_class = group.default_class_exists_on_console?
 
-      # Make sure the correct group exists
+      # Make sure the group exists
       if group.exists?
-        if Ask.confirm "Group \"#{group_name}\" currently exists, use existing group?"
-          Puppet.notice "Using existing group"
-          create_group = false
-        else
+        if options[:recreate_group]
           Puppet.notice "Recreating group..."
           group.destroy
           create_group = true
+        else
+          Puppet.notice "Using existing group"
+          create_group = false
         end
       else
         Puppet.notice "Creating new group for experiment..."
