@@ -122,7 +122,7 @@ Puppet::Face.define(:adopter, '0.0.1') do
 
         output << "Nodes:"
         nodes.each do |node|
-          output << "    #{node.name}
+          output << "    #{node.name}"
         end
         output << "-----------------END VARIATION #{count}-------------"
 

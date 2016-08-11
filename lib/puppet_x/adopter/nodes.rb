@@ -1,5 +1,6 @@
 require 'puppet'
 require 'puppet_x/adopter/client'
+require 'puppet_x/adopter/event'
 
 module PuppetX::Adopter
   class NodeGroup
@@ -165,6 +166,10 @@ module PuppetX::Adopter
       ])
 
       response.data
+    end
+
+    def events_to_a
+      self.events.map { |e| PuppetX::Adopter::Event.new(e)}
     end
 
     def use_transaction_uuid(uuid)
