@@ -4,7 +4,7 @@ module PuppetX::Adopter::Util
 
     spin_thread = Thread.new do
       loop do
-        ['|','/','-','\\'].each { |c| print c; sleep 0.1; print "\b" }
+        %w(| / - \\).each { |c| print c; sleep 0.1; print "\b" }
       end
     end
 

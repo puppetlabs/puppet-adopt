@@ -15,15 +15,15 @@ class PuppetX::Adopter::Runner
 
   def config
     {
-      :server      => "wss://#{Puppet['server']}:8142/pcp/v1.0",
-      :ssl_key     => Puppet['hostprivkey'],
-      :ssl_cert    => Puppet['hostcert'],
-      :ssl_ca_cert => Puppet['localcacert'],
+      server: "wss://#{Puppet['server']}:8142/pcp/v1.0",
+      ssl_key: Puppet['hostprivkey'],
+      ssl_cert: Puppet['hostcert'],
+      ssl_ca_cert: Puppet['localcacert'],
     }.merge @config
   end
 
   def client
-    if not EM.reactor_running?
+    unless EM.reactor_running?
       Thread.new { EM.run }
       Thread.pass until EM.reactor_running?
     end
@@ -33,8 +33,8 @@ class PuppetX::Adopter::Runner
 
   def run(timeout = 60)
 
-    if not client.associated?
-      raise "Failure connecting to PCP broker" unless client.connect
+    unless client.associated?
+      raise 'Failure connecting to PCP broker' unless client.connect
     end
 
     transaction_id = SecureRandom.uuid
@@ -58,7 +58,7 @@ class PuppetX::Adopter::Runner
     run_message.expires(10)
     client.send(run_message)
 
-    progressbar = ProgressBar.create(:total => @group.certnames.count, :title => "Nodes Complete", :length => 80)
+    progressbar = ProgressBar.create(:total => @group.certnames.count, :title => 'Nodes Complete', :length => 80)
 
     begin
       Timeout::timeout(timeout) {
@@ -70,7 +70,7 @@ class PuppetX::Adopter::Runner
       progressbar.finish
     rescue Timeout::Error
       progressbar.finish
-      Puppet.debug "Execution expired while waiting for Puppet Agents to complete run"
+      Puppet.debug 'Execution expired while waiting for Puppet Agents to complete run'
     end
 
     completed_list
@@ -81,21 +81,21 @@ class PuppetX::Adopter::Runner
     targets = node_list.map{|node| "pcp://#{node}/agent" }
 
     message = PCP::Message.new({
-      :message_type => 'http://puppetlabs.com/rpc_non_blocking_request',
-      :targets      => targets
+                                   message_type: 'http://puppetlabs.com/rpc_non_blocking_request',
+      targets: targets
     })
 
     params = {
-      :env => [],
-      :flags => ['--onetime']
+        env: [],
+      flags: ['--onetime']
     }
 
     message_data = {
-      :transaction_id => uuid,
-      :module         => 'pxp-module-puppet',
-      :action         => 'run',
-      :params         => params,
-      :notify_outcome => true
+      transaction_id: uuid,
+      module: 'pxp-module-puppet',
+      action: 'run',
+      params: params,
+      notify_outcome: true
     }
 
     message.data = message_data.to_json

@@ -25,9 +25,9 @@ module PuppetX::Adopter
       if exists?
         @data = nc_client.groups.get_group(id)
 
-        rules = nc_client.rules.translate(@data['rule'])["query"]
+        rules = nc_client.rules.translate(@data['rule'])['query']
 
-        result = pdb_client.request('nodes',["extract","certname", rules])
+        result = pdb_client.request('nodes',['extract', 'certname', rules])
 
         result.data.each do |node|
           @nodes[node['certname']] = PuppetX::Adopter::Node.new( node['certname'] )
@@ -90,14 +90,14 @@ module PuppetX::Adopter
         'name' => name,
         'environment' => 'production',
         'parent' => '00000000-0000-4000-8000-000000000000',
-        'rule' => ["and", ["~", ["fact", "clientcert"], ".*"]],
+        'rule' => ['and', ['~', %w(fact clientcert), '.*']],
         'classes' => Hash.new,
         'variables'=> {'noop' => true}
       }
 
 
       if with_default_class
-        raise(Puppet::Error, "Cannot create group with default class") unless default_class
+        raise(Puppet::Error, 'Cannot create group with default class') unless default_class
         group['classes'] = {default_class => Hash.new}
         result = nc_client.groups.create_group(group)
       else
@@ -124,11 +124,11 @@ module PuppetX::Adopter
     def initialize(certname, pdb_client = nil)
 
       @name = certname
-      @pdb = pdb_client || PuppetX::Adopter::Client.pdb_client()
+      @pdb = pdb_client || PuppetX::Adopter::Client.pdb_client
     end
 
     def report
-      response = pdb.request('reports', ["and",["=","certname",name],["=","latest_report?",true]])
+      response = pdb.request('reports', ['and', ['=', 'certname', name], ['=', 'latest_report?', true]])
 
       response.data
     end
@@ -142,26 +142,18 @@ module PuppetX::Adopter
             ['=','transaction_uuid', transaction_uuid]
           ]).data.first['hash']
 
-        report_lookup = ["=","report", report_hash]
+        report_lookup = ['=', 'report', report_hash]
       else
-        report_lookup = ["=","latest_report?",true]
+        report_lookup = ['=', 'latest_report?', true]
       end
 
       response = pdb.request('events',
         ['extract',
-          [
-            'old_value',
-            'new_value',
-            'resource_title',
-            'resource_type',
-            'property',
-            'message',
-            'containing_class'
-          ],
-          ["and",
+         %w(old_value new_value resource_title resource_type property message containing_class),
+          ['and',
             report_lookup,
-            ['=', 'status', 'noop'],
-            ["=","certname",name]
+            %w(= status noop),
+            ['=', 'certname',name]
           ]
       ])
 

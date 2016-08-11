@@ -23,8 +23,8 @@ Puppet::Face.define(:adopter, '0.0.1') do
 
     arguments '<name>'
 
-    option "--target_dir DIR", "-i DIR" do
-      summary "Target Directory for module installation."
+    option '--target_dir DIR', '-i DIR' do
+      summary 'Target Directory for module installation.'
       description <<-EOT
         This tells you how this works
       EOT
@@ -32,10 +32,10 @@ Puppet::Face.define(:adopter, '0.0.1') do
 
     when_invoked do |name, options|
       Puppet.notice "Preparing to run experiment for module '#{name}'"
-      Puppet.notice "Installing Modules..."
+      Puppet.notice 'Installing Modules...'
 
       module_face = Puppet::Interface[:module, :current]
-      install_result = module_face.install(name,{:target_dir => options[:target_dir]})
+      install_result = module_face.install(name,{target_dir: options[:target_dir]})
 
       if install_result[:result] == :noop
         Puppet.notice "Module #{name} #{install_result[:version]} is already installed."
@@ -57,34 +57,34 @@ Puppet::Face.define(:adopter, '0.0.1') do
       # Make sure the correct group exists
       if group.exists?
         if Ask.confirm "Group \"#{group_name}\" currently exists, use existing group?"
-          Puppet.notice "Using existing group"
+          Puppet.notice 'Using existing group'
           create_group = false
         else
-          Puppet.notice "Recreating group..."
+          Puppet.notice 'Recreating group...'
           group.destroy
           create_group = true
         end
       else
-        Puppet.notice "Creating new group for experiment..."
+        Puppet.notice 'Creating new group for experiment...'
         create_group = true
       end
 
       if create_group
         group.create(use_class)
-        if not use_class
+        unless use_class
           Puppet.notice "No class named \"#{simple_name}\" found, you need to add the correct class or classes to this group manually."
         end
         Puppet.notice "Check classification for \"#{group_name}\" in the Enterprise Console before continuing"
         Puppet.notice "Navigate a browser to https://#{PuppetX::Adopter::Client.nc_config['hostname']}/#/node_groups/groups/#{group.id}"
-        Ask.input "When you are ready, press enter to continue"
+        Ask.input 'When you are ready, press enter to continue'
         group.reload
       end
 
-      Puppet.notice "Starting Puppet Agent runs on experiment population"
+      Puppet.notice 'Starting Puppet Agent runs on experiment population'
       runner = PuppetX::Adopter::Runner.new(group)
       completed = runner.run(120)
 
-      Puppet.notice "Puppet Agent runs completed"
+      Puppet.notice 'Puppet Agent runs completed'
       if completed.count != group.node_count
         Puppet.notice "Only #{completed.count} nodes of #{group.node_count} nodes in group completed a Puppet Agent in time provided"
       end
@@ -117,10 +117,10 @@ Puppet::Face.define(:adopter, '0.0.1') do
           output << "    Old Value: #{event['old_value']}"
           output << "    NewValue:  #{event['new_value']}"
           output << "    Message:  #{event['message']}"
-          output << "---"
+          output << '---'
         end
 
-        output << "Nodes:"
+        output << 'Nodes:'
         nodes.each do |node|
           output << "    #{node.name}"
         end

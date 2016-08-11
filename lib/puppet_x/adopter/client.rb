@@ -28,10 +28,10 @@ module PuppetX::Adopter
 
       def nc_config
         {
-          "ca_certificate_path" => Puppet['localcacert'],
-          "certificate_path"    => Puppet['hostcert'],
-          "private_key_path"    => Puppet['hostprivkey'],
-          "hostname"            => Puppet['server']
+            'ca_certificate_path' => Puppet['localcacert'],
+            'certificate_path' => Puppet['hostcert'],
+            'private_key_path' => Puppet['hostprivkey'],
+            'hostname' => Puppet['server']
         }.merge @nc_config
       end
 
@@ -40,7 +40,7 @@ module PuppetX::Adopter
         begin
           pdb_client.request('nodes', nil)
         rescue
-          raise(Puppet::Error,"Cannot contact default PDB on localhost")
+          raise(Puppet::Error, 'Cannot contact default PDB on localhost')
         end
       end
 
@@ -48,7 +48,7 @@ module PuppetX::Adopter
         begin
           nc_client.groups.get_groups
         rescue
-          raise(Puppet::Error, "Cannot contact default Node Classifier on localhost")
+          raise(Puppet::Error, 'Cannot contact default Node Classifier on localhost')
         end
       end
 
@@ -61,9 +61,9 @@ module PuppetX::Adopter
 
       def build_pdb_client
         @pdb_client = PuppetDB::Client.new({
-          :server => "https://#{pdb_config['hostname']}:8081/pdb/query",
-          :pem => pdb_config
-        },4)
+          server: "https://#{pdb_config['hostname']}:8081/pdb/query",
+          pem: pdb_config
+        }, 4)
 
         verify_pdb_client
         @pdb_client

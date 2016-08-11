@@ -7,7 +7,7 @@ class PuppetX::Adopter::EventTracker
   def initialize(group, pdb_client = nil)
 
     @group = group
-    @client = pdb_client || PuppetX::Adopter::Client.pdb_client()
+    @client = pdb_client || PuppetX::Adopter::Client.pdb_client
     @usable_events = Set.new
     @fuzzy_events = Set.new
   end
@@ -39,8 +39,8 @@ class PuppetX::Adopter::EventTracker
 
     catalog_count = client.request('resources',
       ['extract',
-        [['function','count']],
-        ["and",
+        [%w(function count)],
+        ['and',
           ['=','type',event[:resource_type]],
           ['=','title',event[:resource_title]],
           group.rule
@@ -68,7 +68,7 @@ class PuppetX::Adopter::Event
       end
 
     else
-      raise(ArgumentError, "Must pass a hash to create a new PuppetX::Adopter::Event")
+      raise(ArgumentError, 'Must pass a hash to create a new PuppetX::Adopter::Event')
     end
   end
 
