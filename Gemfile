@@ -7,3 +7,8 @@ gem 'pcp-client'
 gem 'inquirer'
 gem 'puppet'
 
+
+group 'development' do
+  gem 'byebug', require: false
+  gem 'rubocop', require: false
+end
