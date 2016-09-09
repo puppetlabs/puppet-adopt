@@ -152,6 +152,18 @@ In the mean time you'll need to git clone:
 cd /etc/puppetlabs/code/modules`
 git clone https://github.com/trlinkin/puppet-adopt.git adopt`
 ```
+### Create a configuration file
+Create a configuration file in /etc/puppetlabs/puppet/adopter.yaml
+to specify the servers that host the PuppetDB and the Node
+Classifier in a split install. If this file is not present,
+a monolithic installed would be assumed and PDB and NC
+hosts will default to the master.
+
+```yaml
+---
+pdb_host: "puppetdb.puppet.vm"
+nc_host: "console.puppet.vm"
+```
 
 ### Classification Configuration
 
@@ -161,9 +173,10 @@ git clone https://github.com/trlinkin/puppet-adopt.git adopt`
 ![Classification Screenshot 1](https://cloud.githubusercontent.com/assets/1064715/16812083/6b81af3c-4923-11e6-8085-e47a32d43088.png)
 ![Classification Screenshot 2](https://cloud.githubusercontent.com/assets/1064715/16812084/6cff524c-4923-11e6-9f6e-5e31c5045f29.png)
 
-###Manual Install:
+## Manual Install:
 A Number of Gems will need to be installed into Puppet Enterprise for this tool
-to function.
+to function. This is automated in the adopt module, but if you choose to do
+a manual install, these are the steps to follow:
 
 *Gems installed into PE Agent Ruby*
 
