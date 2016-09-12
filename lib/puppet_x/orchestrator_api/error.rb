@@ -32,6 +32,10 @@ class PuppetX::Orchestrator_api::Error < Exception
     when 'puppetlabs.orchestrator/unknown-error'
       UnknownError.new(data, code)
     end
+
+    if res.code == "404"
+      EndpointError.new("Unable to access API - 404")
+    end
   end
 
 end
@@ -45,3 +49,4 @@ class PuppetX::Orchestrator_api::Error::DependencyCycle < PuppetX::Orchestrator_
 class PuppetX::Orchestrator_api::Error::PuppetdbError < PuppetX::Orchestrator_api::Error; end
 class PuppetX::Orchestrator_api::Error::QueryError < PuppetX::Orchestrator_api::Error; end
 class PuppetX::Orchestrator_api::Error::UnknownError < PuppetX::Orchestrator_api::Error; end
+class PuppetX::Orchestrator_api::Error::EndpointError < Exception; end

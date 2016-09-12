@@ -33,8 +33,6 @@ class PuppetX::Orchestrator_api
     https.use_ssl = true
     https.ssl_version = :TLSv1
     https.ca_file = Puppet.settings[:localcacert]
-    #    https.key = OpenSSL::PKey::RSA.new(File.read(Puppet.settings[:hostprivkey]))
-    #    https.cert = OpenSSL::X509::Certificate.new(File.read(Puppet.settings[:hostcert]))
     https.verify_mode = OpenSSL::SSL::VERIFY_PEER
     https
   end
@@ -67,7 +65,7 @@ class PuppetX::Orchestrator_api
     req.body = body.to_json
     res = https.request(req)
 
-    if res.kind_of? Net::HTTPError
+    if res.code != "202"
       Puppet.debug "An Orchestrator API error occured: HTTP #{res.code}, #{res.to_hash.inspect}"
       raise PuppetX::Orchestrator_api::Error.make_error_from_response(res)
     end
