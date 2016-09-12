@@ -1,11 +1,16 @@
 require 'puppetdb'
 require 'puppetclassify'
+require 'puppet_x/adopter/settings'
 
 module PuppetX::Adopter
   class Client
 
     @pdb_config = {}
     @nc_config = {}
+    # Read settings from configuration file
+    settings = PuppetX::Adopter::Settings.new(Puppet[:confdir] + '/adopter.yaml')
+    @pdb_host = settings.pdb_host || Puppet['server']
+    @nc_host = settings.nc_host || Puppet['server']
 
     class << self
 
@@ -14,7 +19,7 @@ module PuppetX::Adopter
       end
 
       def nc_config=(config)
-        @nc_cnfig = config
+        @nc_config = config
       end
 
       def pdb_config
@@ -22,7 +27,7 @@ module PuppetX::Adopter
           'key'      => Puppet['hostprivkey'],
           'cert'     => Puppet['hostcert'],
           'ca_file'  => Puppet['localcacert'],
-          'hostname' => Puppet['server']
+          'hostname' => @pdb_host
         }.merge @pdb_config
       end
 
@@ -31,7 +36,7 @@ module PuppetX::Adopter
           "ca_certificate_path" => Puppet['localcacert'],
           "certificate_path"    => Puppet['hostcert'],
           "private_key_path"    => Puppet['hostprivkey'],
-          "hostname"            => Puppet['server']
+          "hostname"            => @nc_host
         }.merge @nc_config
       end
 
@@ -40,7 +45,7 @@ module PuppetX::Adopter
         begin
           pdb_client.request('nodes', nil)
         rescue
-          raise(Puppet::Error,"Cannot contact default PDB on localhost")
+          raise(Puppet::Error,"PuppetDB server #{@pdb_host} cannot be reached")
         end
       end
 
@@ -48,7 +53,7 @@ module PuppetX::Adopter
         begin
           nc_client.groups.get_groups
         rescue
-          raise(Puppet::Error, "Cannot contact default Node Classifier on localhost")
+          raise(Puppet::Error, "Node Classifier #{@nc_host} cannot be reached")
         end
       end
 
