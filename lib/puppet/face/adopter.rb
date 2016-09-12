@@ -53,7 +53,7 @@ Puppet::Face.define(:adopter, '0.0.1') do
         module_face.install_when_rendering_console(install_result, name,  {})
       end
 
-      simple_name = name.split('-').last
+      simple_name = name.split(/-|\//).last
       group_name = "Adopter Experiment: #{simple_name}"
       group = PuppetX::Adopter::NodeGroup.new(group_name, simple_name)
 
