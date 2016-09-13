@@ -1,6 +1,16 @@
 require 'puppet_x'
 
 module PuppetX::Adopter
+  require 'puppet_x/adopter/settings'
+
+  def self.set_config_path(path)
+    @config_path
+  end
+
+  def self.[](setting)
+    @settings ||= PuppetX::Adopter::Settings.new(@config_path)
+    @settings[setting]
+  end
 end
 
 require 'puppet_x/adopter/client'
