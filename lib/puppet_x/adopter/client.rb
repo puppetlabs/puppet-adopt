@@ -5,39 +5,18 @@ require 'puppet_x/adopter/settings'
 module PuppetX::Adopter
   class Client
 
-    @pdb_config = {}
-    @nc_config = {}
-    # Read settings from configuration file
-    settings = PuppetX::Adopter::Settings.new(Puppet[:confdir] + '/adopter.yaml')
-    @pdb_host = settings.pdb_host || Puppet['server']
-    @nc_host = settings.nc_host || Puppet['server']
-
     class << self
 
-      def pdb_config=(config)
-        @pdb_config = config
+      # Map from generalized settings to correct values for client
+      def map_pdb_config
+        mapping = {'private_key' => 'key', 'certificate' => 'cert', 'ca_certificate' => 'ca_file'}
+        PuppetX::Adopter['puppetdb_client'].map {|k, v| [mapping[k] || k, v] }.to_h
       end
 
-      def nc_config=(config)
-        @nc_config = config
-      end
-
-      def pdb_config
-        {
-          'key'      => Puppet['hostprivkey'],
-          'cert'     => Puppet['hostcert'],
-          'ca_file'  => Puppet['localcacert'],
-          'hostname' => @pdb_host
-        }.merge @pdb_config
-      end
-
-      def nc_config
-        {
-          "ca_certificate_path" => Puppet['localcacert'],
-          "certificate_path"    => Puppet['hostcert'],
-          "private_key_path"    => Puppet['hostprivkey'],
-          "hostname"            => @nc_host
-        }.merge @nc_config
+      # Map from generalized settings to correct values for client
+      def map_nc_config
+        mapping = {'private_key' => 'private_key_path', 'certificate' => 'certificate_path', 'ca_certificate' => 'ca_certificate_path'}
+        PuppetX::Adopter['node_classifier_client'].map {|k, v| [mapping[k] || k, v] }.to_h
       end
 
       def verify_pdb_client
@@ -45,7 +24,7 @@ module PuppetX::Adopter
         begin
           pdb_client.request('nodes', nil)
         rescue
-          raise(Puppet::Error,"PuppetDB server #{@pdb_host} cannot be reached")
+          raise(Puppet::Error,"PuppetDB server cannot be reached")
         end
       end
 
@@ -53,21 +32,23 @@ module PuppetX::Adopter
         begin
           nc_client.groups.get_groups
         rescue
-          raise(Puppet::Error, "Node Classifier #{@nc_host} cannot be reached")
+          raise(Puppet::Error, "Node Classifier cannot be reached")
         end
       end
 
       def build_nc_client
-        @nc_client = PuppetClassify.new("https://#{nc_config['hostname']}:4433/classifier-api", nc_config)
+        config = map_nc_config
+        @nc_client = PuppetClassify.new("https://#{config['hostname']}:4433/classifier-api", config)
 
         verify_nc_client
         @nc_client
       end
 
       def build_pdb_client
+        config = map_pdb_config
         @pdb_client = PuppetDB::Client.new({
-          :server => "https://#{pdb_config['hostname']}:8081/pdb/query",
-          :pem => pdb_config
+          :server => "https://#{config['hostname']}:8081/pdb/query",
+          :pem => config
         },4)
 
         verify_pdb_client
